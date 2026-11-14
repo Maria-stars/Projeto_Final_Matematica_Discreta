@@ -1,36 +1,34 @@
-%As minhas perguntas para o dataset seguem um padrão de hipóteses. Pegando a informação 
-% do dataset e testando se a afirmação é verdadeira.
+% As minhas perguntas para o dataset seguem um padrão de hipóteses.
+% Pego as informações do dataset e testo se a afirmação é verdadeira.
 
-% 1. Se o gênero está mais presente no dataset, então, esse gênero deve ser o que 
-% possui maior Metascore
-% Parafraseando para uma pergunta: Será que o gênero com mais produções é também o com maior metascore?
+% 1. Será que o gênero com mais produções é também o que possui a maior media de Metascore?
 
-regras (funções) adotadas:
+genero_do_filme(Texto, Genero) :-
+    atomic_list_concat(Generos, ', ', Texto),
+    member(Genero, Generos).
 
 genero_unico(Genero) :-
     findall(G, (
-        filme(_, _, _, ListaGeneros, _, _, _, _),
-        atomic_list_concat(Lista, ', ', ListaGeneros),
-        member(G, Lista)
+        filme(_, _, _, Texto, _, _, _, _),
+        genero_do_filme(Texto, G)
     ), Todos),
     sort(Todos, Unicos),
     member(Genero, Unicos).
 
 contar_genero(Genero, Total) :-
-    findall(Titulo, (
-        filme(Titulo, _, _, ListaGeneros, _, _, _, _),
-        sub_atom(ListaGeneros, _, _, _, Genero)
+    genero_unico(Genero),
+    findall(1, (
+        filme(_, _, _, Texto, _, _, _, _),
+        genero_do_filme(Texto, Genero)
     ), Filmes),
     length(Filmes, Total).
 
-
-% ignora os filmes com nota 0
-
 media_metascore(Genero, Media) :-
+    genero_unico(Genero),
     findall(Meta, (
-        filme(_, _, _, ListaGeneros, _, Meta, _, _),
-        Meta > 0,
-        sub_atom(ListaGeneros, _, _, _, Genero)
+        filme(_, _, _, Texto, _, Meta, _, _),
+        genero_do_filme(Texto, Genero),
+        Meta > 0
     ), Notas),
     Notas \= [],
     sum_list(Notas, Soma),
@@ -38,50 +36,39 @@ media_metascore(Genero, Media) :-
     Media is Soma / Qtd.
 
 genero_mais_presente(Genero, MaxTotal) :-
-    findall(Total-G, (
-        genero_unico(G),
-        contar_genero(G, Total)
-    ), Pares),
-    max_member(MaxTotal-Genero, Pares).
+    findall(Total-G, contar_genero(G, Total), Pares),
+    Pares \= [],
+    max_member(MaxTotal-_, Pares),
+    member(MaxTotal-Genero, Pares).
 
 genero_maior_metascore(Genero, MaxMedia) :-
-    findall(Media-G, (
-        genero_unico(G),
-        media_metascore(G, Media)
-    ), Pares),
-    max_member(MaxMedia-Genero, Pares).
+    findall(Media-G, media_metascore(G, Media), Pares),
+    Pares \= [],
+    max_member(MaxMedia-_, Pares),
+    member(MaxMedia-Genero, Pares).
 
 hipotese_verdadeira(GenMaisPresente, GenMaiorMeta) :-
     genero_mais_presente(GenMaisPresente, _),
     genero_maior_metascore(GenMaiorMeta, _),
-    GenMaisPresente == GenMaiorMet
+    GenMaisPresente == GenMaiorMeta.
 
-% 2. Se um filme foi dirigido pelo mesmo diretor, então, ele deve ter o mesmo metascore
-% Parafraseando para uma pergunta: Será que os filmes produzidos pelo mesmo diretor possuem o mesmo metascore?
-diretor(Diretor) :-
-    findall(D, (
-        filme(_, _, _, _, _, _, ListaDiretor, _),
-        atomic_list_concat(Lista, ', ', ListaDiretor),
-        member(D, Lista)
-    ), Todos),
-    sort(Todos, Unicos),
-    member(Diretor, Unicos).
+hipotese_genero_mais_presente(Resultado) :-
+    (   hipotese_verdadeira(_, _)
+    ->  Resultado = verdadeiro
+    ;   Resultado = falso
+    ).
 
-contar_diretor(Diretor, Total) :-
-    findall(Titulo, (
-        filme(Titulo, _, _, _, _, _, ListaDiretor, _),
-        sub_atom(ListaDiretor, _, _, _, Diretor)
-    ), Filmes),
-    length(Filmes, Total).
+% 2. Será que os filmes dirigidos pelo mesmo diretor possuem o mesmo Metascore?
 
 diretor_variou_nota(Diretor, Filme1, Meta1, Filme2, Meta2) :-
-    filme(Filme1, _, _, _, _, Meta1, ListaDir1, _),
-    filme(Filme2, _, _, _, _, Meta2, ListaDir2, _),
-    Filme1 \= Filme2,
-    Meta1 > 0, Meta2 > 0,
-    sub_atom(ListaDir1, _, _, _, Diretor),
-    sub_atom(ListaDir2, _, _, _, Diretor),
-    Meta1 \= Meta2.
+    filme(Filme1, Ano1, _, _, _, Meta1, Diretor, _),
+    filme(Filme2, Ano2, _, _, _, Meta2, Diretor, _),
+    Filme1-Ano1 @< Filme2-Ano2,
+    Meta1 > 0,
+    Meta2 > 0,
+    Meta1 =\= Meta2.
+
+% Se encontrar um contraexemplo, a hipótese é falsa.
 
 hipotese_diretor_mesmo_metascore(Resultado) :-
     (   diretor_variou_nota(_, _, _, _, _)
@@ -89,16 +76,19 @@ hipotese_diretor_mesmo_metascore(Resultado) :-
     ;   Resultado = verdadeiro
     ).
 
-% 3. Se um diretor fez um gênero de filme, então, todos os seus filmes devem ter o mesmo gênero.
-% Parafazeando para uma pergunta: Será que um diretor só produz um único gênero?
+% 3. Será que todos os filmes de um diretor possuem a mesma combinação de gêneros?
+
+generos_ordenados(Texto, Generos) :-
+    atomic_list_concat(Lista, ', ', Texto),
+    sort(Lista, Generos).
+
 diretor_variou_genero(Diretor, Filme1, Gen1, Filme2, Gen2) :-
-    diretor(Diretor),
-    filme(Filme1, _, _, Gen1, _, _, ListaDir1, _),
-    filme(Filme2, _, _, Gen2, _, _, ListaDir2, _),
-    Filme1 \= Filme2,
-    sub_atom(ListaDir1, _, _, _, Diretor),
-    sub_atom(ListaDir2, _, _, _, Diretor),
-    Gen1 \= Gen2.
+    filme(Filme1, Ano1, _, Gen1, _, _, Diretor, _),
+    filme(Filme2, Ano2, _, Gen2, _, _, Diretor, _),
+    Filme1-Ano1 @< Filme2-Ano2,
+    generos_ordenados(Gen1, Generos1),
+    generos_ordenados(Gen2, Generos2),
+    Generos1 \= Generos2.
 
 hipotese_diretor_mesmo_genero(Resultado) :-
     (   diretor_variou_genero(_, _, _, _, _)
