@@ -1,116 +1,282 @@
-# Projeto_Final_Matematica_Discreta
+# Projeto Final de Lógica e Matemática Discreta
 
-Estudante: Maria Eduarda dos Santos
+**Estudante:** Maria Eduarda dos Santos  
+**Projeto:** Knowledge Engine — uma base de conhecimento sobre filmes em Prolog
 
-Dataset utilizado: https://www.kaggle.com/datasets/amanbarthwal/imdb-movies-data
+## Sobre o projeto
 
-Tamanho do dataset: 10.000 registros 
+A inspiração para as perguntas partiu de uma iniciação científica que realizei no ensino médio sobre filmes de animação. A partir disso, quis trabalhar com uma base de filmes e testar algumas hipóteses sobre os gêneros, os diretores e as notas da crítica.
 
-Descrição das colunas:
-Pôster: link para o pôster do filme.
-Título: nome do filme.
-Ano: ano em que o filme foi lançado.
-Certificado: classificação etária atribuída ao filme (ex.: PG, R).
-Duração (min): tempo de duração do filme em minutos.
-Gênero: gênero(s) do filme (ex.: Ação, Comédia, Drama).
-Classificação: Avaliação dos usuários do IMDB para o filme.
-Metascore: pontuação da crítica.
-Diretor: diretor(es) do filme.
-Elenco: atores principais do filme.
-Votos: número de votos que o filme recebeu no IMDB.
-Descrição: breve resumo do enredo do filme.
-Número de avaliações: total de avaliações.
-Título da avaliação: título da avaliação.
-Crítica: crítica de cinema (crítica com o maior número de votos).
+As minhas perguntas seguem um padrão de hipóteses: pego as informações do dataset e verifico se elas sustentam uma afirmação. Para isso, utilizo Python para preparar os dados e gerar a base de conhecimento. As perguntas são respondidas pelas regras em Prolog.
 
-Colunas utilizadas:
-Título, Ano, Duração, Gênero, Classificacão, Metascore, Diretor, Votos
+## Dataset utilizado:
 
-A inspiração para as perguntas partiram de uma iniciação científica que realizei no ensino médio sobre filmes de animação.
+[IMDB Movies Dataset — Kaggle, Harshit Shankhdhar](https://www.kaggle.com/datasets/harshitshankhdhar/imdb-dataset-of-top-1000-movies-and-tv-shows).
 
-# Para criar o banco em prolog:
-Foi utilizado os comandos presentes no arquivo gerar_base_pl.py. O qual lê o CSV de imdb_top_1000.csv com pandas e seleciona os 8 campos utilizados para responder as perguntas. 
+O arquivo utilizado é o `imdb.csv` (originalmente chamado `imdb_top_1000.csv`), com **1.000 registros e 16 colunas**. Dela, foram selecionados **8 campos**, misturando variáveis qualitativas e quantitativas.
 
-("Título, Ano, Duração, Gênero, Classificacão, Metascore, Diretor, Votos")
+### Explicação de cada coluna do CSV
 
-# Dificuldades encontradas:
--  No dataset, os gênero de um filme estão todos juntos, por exemplo, "Drama, War". Então, tive que separar individualmente cada gênero, o que acontece em "sub_atom".
-- Filmes sem avaliação ou com nota 0 de autopreenchimento, não deveriam ser consideradas para o calculo das notas dos filmes para não influenciar negativamente a análise.
+Os nomes abaixo correspondem às colunas que estão no arquivo utilizado no projeto.
 
-# Sobre as regras e perguntas:
+| Coluna | Descrição | Utilizada na base Prolog? |
+| --- | --- | --- |
+| `Poster_Link` | Pôster: link para a imagem do pôster do filme. | Não |
+| `Series_Title` | Título: nome do filme. | Sim |
+| `Released_Year` | Ano: ano em que o filme foi lançado. | Sim |
+| `Certificate` | Certificado: classificação etária registrada para o filme. | Não |
+| `Runtime` | Duração: tempo de duração do filme, escrito com a indicação de minutos. | Sim |
+| `Genre` | Gênero: um ou mais gêneros associados ao filme, como Drama e Comédia. | Sim |
+| `IMDB_Rating` | Nota IMDb: avaliação dos usuários para o filme. | Sim |
+| `Overview` | Descrição: breve resumo do enredo do filme. | Não |
+| `Meta_score` | Metascore: pontuação da crítica para o filme. | Sim |
+| `Director` | Diretor: nome de quem dirigiu o filme. Nesta tabela, cada registro possui um nome nesse campo. | Sim |
+| `Star1` | Elenco: primeiro nome de destaque listado no registro do filme. | Não |
+| `Star2` | Elenco: segundo nome de destaque listado no registro do filme. | Não |
+| `Star3` | Elenco: terceiro nome de destaque listado no registro do filme. | Não |
+| `Star4` | Elenco: quarto nome de destaque listado no registro do filme. | Não |
+| `No_of_Votes` | Votos: quantidade de votos recebidos pelo filme no IMDb. | Sim |
+| `Gross` | Bilheteria: valor de arrecadação registrado para o filme. | Não |
 
-1. Se o gênero está mais presente no dataset, então, esse gênero deve ser o que possui maior Metascore
+### Campos selecionados
 
-Para responder essa pergunta foram aplicados várias regras:
-- genero_unico: Separação dos vários gêneros de um filme para que fossem tratados individualmente.
-- contar_genero: contagem de cada gênero.
-- media_metascore: faz o cálculo da nota média dos filmes de cada gênero.
-- genero_mais_presente: faz um max no calculo de contar_genero
-- genero_maior_metascore: identifica qual o gênero com o maior metascore, utiliza o media_metascore.
-- hipotese_verdadeira: valida a hipoteses. Com retorno de True ou False.
+A base utiliza, nesta ordem: **Título, Ano, Duração, Gênero, Nota IMDb, Metascore, Diretor e Votos**.
 
-2. Se um filme foi dirigido pelo mesmo diretor, então, ele deve ter o mesmo metascore
+Título, gênero e diretor são informações qualitativas. Ano, duração, notas e votos são informações quantitativas.
 
-Utilizando a mesma lógia da pergunta 1, as regras para essa pergunta foram separadas em:
-- diretor: identifica individualmente cada diretor
-- contar_diretor: conta quantas produções tem um diretor 
-- diretor_variou_nota: compara filme a filme de cada diretor para identificar se houve variação em alguma nota
-- hipotese_diretor_mesmo_metascore: testa a hipoteses e retorna True ou False.
+## Organização dos arquivos
 
-3. Se um diretor fez um gênero de filme, então, todos os seus filmes devem ter o mesmo gênero.
+| Arquivo | Para que serve |
+| --- | --- |
+| `imdb.csv` | Tabela-fonte com os dados dos filmes. |
+| `gerar_base_pl.py` | Script Python que lê o CSV e gera `filmes.pl`. |
+| `filmes.pl` | Base de conhecimento com 1.000 fatos `filme/8`. |
+| `perguntas.pl` | Regras auxiliares e hipóteses das três perguntas, escritas diretamente em Prolog. |
+| `README.md` | Explicação da construção do projeto e de como rodá-lo. |
 
-Reutilizando as regras das perguntas 1 e 3, adicionei apenas mais duas regras:
-- diretor_variou_genero: compara filme a filme de cada diretor e verifica se houve variação de gênero
-- hipotese_diretor_mesmo_genero: testa a hipoteses.
+## Como a base foi construída
 
+No arquivo `gerar_base_pl.py`:
 
-# Para Testar:
-1. 
-genero_mais_presente(MaisPresente, Total), genero_maior_metascore(MaiorMeta, Media), (MaisPresente == MaiorMeta -> Resultado = verdadeiro ; Resultado = falso).
+- Seleção dos 8 campos;
+- Retirada de `min`da duração e tratando o tempo como campo numerico;
+- Representação campos numéricos ausentes ou inválidos com `0`.
+- Tratamento de apóstrofos e barras nos textos para preservar os valores em Prolog.
+- Escreve um fato para cada registro no arquivo `filmes.pl`
 
-Output:
-MaiorMeta = 'Film-Noir',
-MaisPresente = 'Drama',
-Media = 93.72727272727273,
-Resultado = falso,
-Total = 724 
+O formato de cada fato é:
 
-2. 
+```prolog
+filme(Titulo, Ano, Duracao, Generos, NotaIMDb, Metascore, Diretor, Votos).
+```
+
+Exemplo real da base:
+
+```prolog
+filme('The Shawshank Redemption', 1994, 142, 'Drama', 9.3, 80, 'Frank Darabont', 2343110).
+```
+
+## Dificuldades encontradas e cuidados com os dados
+
+- Os gêneros de um filme aparecem juntos, como `'Action, Adventure, Drama'`. Então, precisei separar cada gênero com `atomic_list_concat/3` e verificar a presença com `member/2`. Assim, `Music` e `Musical` são tratados como gêneros diferentes.
+- Um filme pode participar da contagem de mais de um gênero. Por isso, a soma das contagens dos gêneros pode ultrapassar o total de filmes.
+- Registros sem matescore são representados com `0` e desconsiderados nos cálculos de média e na comparação de notas, utilizando `Meta > 0`.
+- Para relacionar dois filmes ao mesmo diretor, utilizo a mesma variável no campo `Director` dos dois fatos. Assim, a comparação exige o nome completo igual.
+- A comparação de gêneros considera listas ordenadas, evitando que `'Drama, Crime'` e `'Crime, Drama'` sejam tratados como combinações diferentes.
+
+## Sobre as regras e perguntas
+
+### 1. Será que o gênero com mais produções é também o com maior Metascore médio?
+
+A minha hipótese é: se um gênero está mais presente no dataset, então ele também deve ter a maior média de avaliação da crítica.
+
+Para responder, as regras foram separadas em:
+
+- `genero_do_filme/2`: separa o texto de gêneros e verifica cada gênero completo.
+- `genero_unico/1`: lista os gêneros sem repetição.
+- `contar_genero/2`: conta quantos filmes estão associados a cada gênero.
+- `media_metascore/2`: calcula a média das notas válidas dos filmes daquele gênero.
+- `genero_mais_presente/2`: identifica a maior contagem e os gêneros que atingem esse valor.
+- `genero_maior_metascore/2`: identifica a maior média e os gêneros que atingem esse valor.
+- `hipotese_verdadeira/2`: verifica se existe um gênero entre os vencedores dos dois grupos.
+- `hipotese_genero_mais_presente/1`: retorna `verdadeiro` ou `falso` para a hipótese.
+
+Essa pergunta utiliza **agrupamento por gênero, contagem, média e comparação de máximos**.
+
+Consulta:
+
+```prolog
+genero_mais_presente(MaisPresente, Total),
+genero_maior_metascore(MaiorMeta, Media),
+hipotese_genero_mais_presente(Resultado).
+```
+
+Resultado obtido no SWI-Prolog:
+
+```text
+MaisPresente = 'Drama'
+Total = 724
+MaiorMeta = 'Film-Noir'
+Media = 93.72727272727273
+Resultado = falso
+```
+
+Assim, a hipótese não é sustentada pelos dados: Drama é o gênero mais presente, enquanto Film-Noir tem a maior média de Metascore.
+
+### 2. Será que os filmes dirigidos pelo mesmo diretor possuem o mesmo Metascore?
+
+A hipótese é que os filmes de um mesmo diretor tenham a mesma nota da crítica. Para verificar isso, procuro um contraexemplo: dois filmes do mesmo diretor com notas válidas diferentes.
+
+As regras relacionadas a essa pergunta são:
+
+- `diretor/1`: lista os diretores sem repetição.
+- `contar_diretor/2`: conta os filmes de um diretor. É uma regra de apoio disponível para explorar a base.
+- `diretor_variou_nota/5`: procura dois filmes distintos do mesmo diretor, com Metascores válidos e diferentes.
+- `hipotese_diretor_mesmo_metascore/1`: verifica se existe algum contraexemplo na base e retorna `verdadeiro` ou `falso`.
+
+Essa pergunta utiliza **comparação entre registros, composição de condições e busca de contraexemplo**.
+
+Consulta:
+
+```prolog
 hipotese_diretor_mesmo_metascore(Resultado).
+```
 
-Exemplo:
+Resultado obtido:
+
+```text
+Resultado = falso
+```
+
+Para visualizar um contraexemplo:
+
+```prolog
 diretor_variou_nota('Ron Clements', Filme1, Meta1, Filme2, Meta2).
+```
 
-Output:
-Filme1 = 'Aladdin',
-Filme2 = 'Moana',
-Meta1 = 86,
+Uma resposta obtida é:
+
+```text
+Filme1 = 'Aladdin'
+Meta1 = 86
+Filme2 = 'Moana'
 Meta2 = 81
+```
 
-3. 
+Esses dois filmes já mostram que a hipótese geral não se sustenta na base. Como as notas ausentes são ignoradas, a comparação exige duas notas maiores que zero.
+
+### 3. Será que todos os filmes de um diretor possuem a mesma combinação de gêneros?
+
+A ideia inicial era entender se um diretor se mantém nos mesmos gêneros. Para deixar a pergunta mais precisa, comparo o conjunto de gêneros dos seus filmes.
+
+Por exemplo, `'Action, Adventure, Drama'` e `'Crime, Drama, Mystery'` são combinações diferentes, mesmo compartilhando o gênero Drama.
+
+Reutilizando a base de filmes, foram adicionadas estas regras:
+
+- `generos_ordenados/2`: separa e ordena os gêneros de cada filme, removendo repetições.
+- `diretor_variou_genero/5`: procura dois filmes do mesmo diretor com conjuntos de gêneros diferentes.
+- `hipotese_diretor_mesmo_genero/1`: verifica se existe algum contraexemplo na base e retorna `verdadeiro` ou `falso`.
+
+Essa pergunta utiliza **comparação entre registros, predicado auxiliar, tratamento de conjuntos e composição de regras**.
+
+Consulta:
+
+```prolog
 hipotese_diretor_mesmo_genero(Resultado).
+```
 
-Output: false
+Resultado obtido:
 
-Exemplo:
-Rodando: diretor_variou_genero(Diretor, Filme1, Gen1, Filme2, Gen2).
-Output: 
-Diretor = 'Akira Kurosawa',
-Filme1 = 'Shichinin no samurai',
-Filme2 = 'Tengoku to jigoku',
-Gen1 = 'Action, Adventure, Drama',
+```text
+Resultado = falso
+```
+
+Para visualizar um contraexemplo:
+
+```prolog
+diretor_variou_genero('Akira Kurosawa', Filme1, Gen1, Filme2, Gen2).
+```
+
+Uma resposta obtida é:
+
+```text
+Filme1 = 'Shichinin no samurai'
+Gen1 = 'Action, Adventure, Drama'
+Filme2 = 'Tengoku to jigoku'
 Gen2 = 'Crime, Drama, Mystery'
+```
 
-Diretor = 'Akira Kurosawa',
-Filme1 = 'Shichinin no samurai',
-Filme2 = 'Ran',
-Gen1 = 'Action, Adventure, Drama',
-Gen2 = 'Action, Drama, War'
+Assim, a combinação de gêneros não é sempre igual nos filmes de um mesmo diretor. Isso não significa que os filmes não compartilhem nenhum gênero.
 
-Diretor = 'Akira Kurosawa',
-Filme1 = 'Shichinin no samurai',
-Filme2 = 'Yôjinbô',
-Gen1 = 'Action, Adventure, Drama',
-Gen2 = 'Action, Drama, Thriller'
+## Como rodar o projeto
 
+### 1. Preparar o ambiente
 
+É necessário ter **Python 3** e **SWI-Prolog** instalados. O Python utiliza apenas a biblioteca padrão.
+
+Baixe ou clone o repositório e abra um terminal na pasta que contém o CSV e os arquivos do projeto. Para conferir as instalações:
+
+```bash
+python --version
+swipl --version
+```
+
+Se o seu sistema utiliza `python3`, substitua `python` por `python3` nos comandos.
+
+### 2. Gerar a base Prolog
+
+Execute:
+
+```bash
+python gerar_base_pl.py
+```
+
+A saída esperada é:
+
+```text
+Arquivo filmes.pl atualizado com 8 colunas!
+```
+
+Execute o comando dentro da pasta do projeto. Ele substitui somente `filmes.pl`. O arquivo `imdb.csv` precisa estar nessa mesma pasta.
+
+### 3. Carregar a base e as regras
+
+No terminal, execute:
+
+```bash
+swipl
+```
+
+No console do Prolog, carregue:
+
+```prolog
+['perguntas.pl'].
+```
+
+O arquivo de regras carrega `filmes.pl` automaticamente. 
+
+### 4. Executar as três perguntas
+
+No console do Prolog, execute cada consulta separadamente:
+
+```prolog
+hipotese_genero_mais_presente(Resultado).
+```
+
+```prolog
+hipotese_diretor_mesmo_metascore(Resultado).
+```
+
+```prolog
+hipotese_diretor_mesmo_genero(Resultado).
+```
+
+Na base enviada, as três retornam `Resultado = falso`. As consultas detalhadas das seções anteriores permitem visualizar os gêneros, as médias e os contraexemplos.
+
+Cada consulta termina com ponto final. O símbolo `?-` é o prompt do console e não precisa ser digitado. Quando houver mais respostas, utilize `;` para pedir a próxima. Os pares de filmes aparecem em uma única ordem para evitar repetições.
+
+Para encerrar:
+
+```prolog
+halt.
+```
