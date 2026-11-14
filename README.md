@@ -31,9 +31,6 @@ A inspiração para as perguntas partiram de uma iniciação científica que rea
 # Para criar o banco em prolog:
 Foi utilizado os comandos presentes no arquivo gerar_base_pl.py
 
-
-As minhas perguntas para o dataset surgiram a partir de hipóteses:
-
 1. 
 
 Dificuldade encontrada: No dataset, os gênero de um filme estão todos juntos, por exemplo, "Drama, War". Então, tive que separar individualmente cada gênero, o que acontece em "sub_atom".
@@ -51,8 +48,6 @@ Total = 724
 
 2. 
 
-(aplicando a mesma lógica do gênero, levando em consideração que um filme pode ser dirigido por mais de um diretor):
-
 PARA TESTAR:
 hipotese_diretor_mesmo_metascore(Resultado).
 
@@ -65,7 +60,7 @@ Filme2 = 'Moana',
 Meta1 = 86,
 Meta2 = 81
 
-
+3. 
 PARA RODAR:
 hipotese_diretor_mesmo_genero(Resultado).
 

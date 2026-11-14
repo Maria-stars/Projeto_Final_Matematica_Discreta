@@ -3,6 +3,7 @@
 
 % 1. Se o gênero está mais presente no dataset, então, esse gênero deve ser o que 
 % possui maior Metascore
+% Parafraseando para uma pergunta: Será que o gênero com mais produções é também o com maior metascore?
 
 regras (funções) adotadas:
 
@@ -56,7 +57,7 @@ hipotese_verdadeira(GenMaisPresente, GenMaiorMeta) :-
     GenMaisPresente == GenMaiorMet
 
 % 2. Se um filme foi dirigido pelo mesmo diretor, então, ele deve ter o mesmo metascore
-
+% Parafraseando para uma pergunta: Será que os filmes produzidos pelo mesmo diretor possuem o mesmo metascore?
 diretor(Diretor) :-
     findall(D, (
         filme(_, _, _, _, _, _, ListaDiretor, _),
@@ -89,7 +90,7 @@ hipotese_diretor_mesmo_metascore(Resultado) :-
     ).
 
 % 3. Se um diretor fez um gênero de filme, então, todos os seus filmes devem ter o mesmo gênero.
-
+% Parafazeando para uma pergunta: Será que um diretor só produz um único gênero?
 diretor_variou_genero(Diretor, Filme1, Gen1, Filme2, Gen2) :-
     diretor(Diretor),
     filme(Filme1, _, _, Gen1, _, _, ListaDir1, _),
